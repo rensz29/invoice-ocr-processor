@@ -8,6 +8,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8002',
         changeOrigin: true,
+      },
+      '/db': {
+        target: 'http://localhost:8003',
+        changeOrigin: true,
       }
     }
   }

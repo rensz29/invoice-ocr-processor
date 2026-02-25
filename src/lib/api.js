@@ -58,82 +58,44 @@ export async function processInvoice(file, onProgress) {
   return parsed
 }
 
-// ─── IndexedDB as local "Postgres" ────────────────────────────────────────────
-
-const DB_NAME = 'sparrow_invoices'
-const DB_VERSION = 1
-const STORE = 'invoices'
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION)
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result
-      if (!db.objectStoreNames.contains(STORE)) {
-        const store = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true })
-        store.createIndex('createdAt', 'createdAt', { unique: false })
-        store.createIndex('customerName', 'Customer Name', { unique: false })
-      }
-    }
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error)
-  })
-}
-
 export async function saveRecords(records, filename) {
-  const db = await openDB()
-  const tx = db.transaction(STORE, 'readwrite')
-  const store = tx.objectStore(STORE)
+  const response = await fetch('/db/invoices', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ records, filename }),
+  })
 
-  const saved = []
-  for (const record of records) {
-    const row = {
-      ...record,
-      _filename: filename,
-      _createdAt: new Date().toISOString(),
-    }
-    const id = await new Promise((res, rej) => {
-      const req = store.add(row)
-      req.onsuccess = () => res(req.result)
-      req.onerror = () => rej(req.error)
-    })
-    saved.push({ ...row, id })
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`DB Error ${response.status}: ${err}`)
   }
 
-  return saved
+  return response.json()
 }
 
 export async function getAllRecords() {
-  const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly')
-    const store = tx.objectStore(STORE)
-    const req = store.getAll()
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error)
-  })
+  const response = await fetch('/db/invoices')
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`DB Error ${response.status}: ${err}`)
+  }
+  return response.json()
 }
 
 export async function deleteRecord(id) {
-  const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite')
-    const store = tx.objectStore(STORE)
-    const req = store.delete(id)
-    req.onsuccess = () => resolve()
-    req.onerror = () => reject(req.error)
-  })
+  const response = await fetch(`/db/invoices/${id}`, { method: 'DELETE' })
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`DB Error ${response.status}: ${err}`)
+  }
 }
 
 export async function clearAllRecords() {
-  const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite')
-    const store = tx.objectStore(STORE)
-    const req = store.clear()
-    req.onsuccess = () => resolve()
-    req.onerror = () => reject(req.error)
-  })
+  const response = await fetch('/db/invoices', { method: 'DELETE' })
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`DB Error ${response.status}: ${err}`)
+  }
 }
 
 // ─── CSV Export ───────────────────────────────────────────────────────────────

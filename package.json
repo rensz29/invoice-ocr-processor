@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 5008",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node server/db-server.js"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -16,7 +17,9 @@
     "react-hot-toast": "^2.4.1",
     "papaparse": "^5.4.1",
     "lucide-react": "^0.441.0",
-    "clsx": "^2.1.1"
+    "clsx": "^2.1.1",
+    "express": "^4.21.1",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",
