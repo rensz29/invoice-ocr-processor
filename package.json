@@ -7,7 +7,13 @@
     "dev": "vite --port 5008",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node server/db-server.js"
+    "server": "node server/db-server.js",
+    "start": "pm2 start ecosystem.config.cjs",
+    "stop": "pm2 stop ecosystem.config.cjs",
+    "restart": "pm2 restart ecosystem.config.cjs",
+    "pm2:logs": "pm2 logs",
+    "pm2:status": "pm2 status",
+    "pm2:delete": "pm2 delete ecosystem.config.cjs"
   },
   "dependencies": {
     "react": "^18.3.1",
