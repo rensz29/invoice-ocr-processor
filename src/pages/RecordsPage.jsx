@@ -128,9 +128,16 @@ export default function RecordsPage() {
   return (
     <div className="page-enter">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        marginBottom: '24px',
+      }}
+      className="records-header"
+      >
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 800, marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, marginBottom: '4px' }}>
             DATABASE<span style={{ color: 'var(--accent)' }}>.</span>RECORDS
           </h1>
           <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
@@ -142,7 +149,7 @@ export default function RecordsPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           {selected.size > 0 && (
             <button
               onClick={handleDeleteSelected}
@@ -202,8 +209,9 @@ export default function RecordsPage() {
         gap: '12px',
         marginBottom: '16px',
         alignItems: 'center',
+        flexWrap: 'wrap',
       }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: '360px' }}>
+        <div style={{ position: 'relative', flex: '1 1 100%', minWidth: 0, maxWidth: '100%' }} className="records-search-wrap">
           <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             value={search}
@@ -268,7 +276,7 @@ export default function RecordsPage() {
             </div>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <table style={{ width: '100%', fontSize: '12px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>

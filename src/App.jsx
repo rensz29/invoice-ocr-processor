@@ -11,28 +11,23 @@ function Layout({ children }) {
       <header style={{
         background: 'var(--surface)',
         borderBottom: '1px solid var(--border)',
-        padding: '0 32px',
+        padding: `0 var(--header-padding-x)`,
         display: 'flex',
+        flexWrap: 'wrap',
         alignItems: 'center',
-        gap: '32px',
-        height: '60px',
+        gap: '16px',
+        minHeight: 'var(--touch-min)',
+        height: 'auto',
+        paddingTop: '12px',
+        paddingBottom: '12px',
         position: 'sticky',
         top: 0,
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginRight: 'auto' }}>
-          {/* <SparrowIcon size={28} color="var(--accent)" />
-          <span style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: '16px',
-            letterSpacing: '0.05em',
-            color: 'var(--text)',
-          }}>
-            SPARROW<span style={{ color: 'var(--accent)' }}>_</span>PARSE
-          </span> */}
+          {/* Logo placeholder */}
         </div>
-        <nav style={{ display: 'flex', gap: '4px' }}>
+        <nav style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
           {[
             { to: '/', label: 'UPLOAD' },
             { to: '/records', label: 'RECORDS' },
@@ -42,11 +37,17 @@ function Layout({ children }) {
               to={to}
               end={to === '/'}
               style={({ isActive }) => ({
-                padding: '6px 16px',
+                padding: '10px 16px',
+                minHeight: 'var(--touch-min)',
+                minWidth: 'var(--touch-min)',
+                boxSizing: 'border-box',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 borderRadius: 'var(--radius)',
                 textDecoration: 'none',
                 fontFamily: 'var(--font-display)',
-                fontSize: '12px',
+                fontSize: 'clamp(11px, 2.5vw, 12px)',
                 fontWeight: 600,
                 letterSpacing: '0.1em',
                 background: isActive ? 'var(--accent)' : 'transparent',
@@ -59,7 +60,7 @@ function Layout({ children }) {
           ))}
         </nav>
       </header>
-      <main style={{ flex: 1, padding: '40px 32px', maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
+      <main style={{ flex: 1, padding: 'var(--main-padding)', maxWidth: '1400px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
         {children}
       </main>
     </div>

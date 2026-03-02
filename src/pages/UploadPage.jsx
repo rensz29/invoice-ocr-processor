@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Upload, FileImage, CheckCircle, AlertCircle, Loader, ChevronRight } from 'lucide-react'
+import { Upload, FileImage, CheckCircle, Loader, ChevronRight, Camera } from 'lucide-react'
 import { processInvoice, saveRecords } from '../lib/api.js'
 
 const FIELD_LABELS = [
@@ -18,15 +18,35 @@ export default function UploadPage() {
   const [progress, setProgress] = useState('')
   const [results, setResults] = useState([])
   const [editIndex, setEditIndex] = useState(null)
+  const cameraInputRef = useRef(null)
+
+  const setFileAndPreview = useCallback((newFile) => {
+    setPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return newFile ? URL.createObjectURL(newFile) : null
+    })
+    setFile(newFile)
+    setStatus('idle')
+    setResults([])
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
 
   const onDrop = useCallback((accepted) => {
     const f = accepted[0]
     if (!f) return
-    setFile(f)
-    setPreview(URL.createObjectURL(f))
-    setStatus('idle')
-    setResults([])
-  }, [])
+    setFileAndPreview(f)
+  }, [setFileAndPreview])
+
+  const onCameraChange = useCallback((e) => {
+    const f = e.target.files?.[0]
+    if (f) setFileAndPreview(f)
+    e.target.value = ''
+  }, [setFileAndPreview])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -77,12 +97,12 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="page-enter" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+    <div className="page-enter upload-page">
       {/* Left: Upload Area */}
-      <div style={{ flex: '0 0 380px' }}>
+      <div className="upload-panel">
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '28px',
+          fontSize: 'clamp(22px, 5vw, 28px)',
           fontWeight: 800,
           marginBottom: '8px',
           lineHeight: 1.1,
@@ -90,17 +110,66 @@ export default function UploadPage() {
           INVOICE<br />
           <span style={{ color: 'var(--accent)' }}>PROCESSOR</span>
         </h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '28px', fontSize: '13px' }}>
-          Upload an invoice image. Sparrow LLM will extract structured data.
+        <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: 'clamp(12px, 2vw, 13px)' }}>
+          Upload or capture an invoice image. Sparrow LLM will extract structured data.
         </p>
 
-        {/* Dropzone */}
+        <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: 'clamp(12px, 2vw, 13px)' }}>
+          Upload or capture an invoice image. Sparrow LLM will extract structured data.
+        </p>
+
+        {/* Take photo (camera) input - hidden */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={onCameraChange}
+          style={{ display: 'none' }}
+          aria-hidden="true"
+        />
+
+        {/* Choice: Upload area (dropzone) or Take photo button */}
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          marginBottom: '16px',
+          flexWrap: 'wrap',
+        }}>
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            style={{
+              padding: '12px 20px',
+              minHeight: 'var(--touch-min)',
+              background: 'var(--surface2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--text)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontFamily: 'var(--font-display)',
+              fontSize: '13px',
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Camera size={20} color="var(--accent)" />
+            Take photo
+          </button>
+          <span style={{ alignSelf: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>or upload below</span>
+        </div>
+
+        {/* Dropzone: drag & drop + click to browse + preview */}
         <div
           {...getRootProps()}
           style={{
             border: `2px dashed ${isDragActive ? 'var(--accent)' : 'var(--border)'}`,
             borderRadius: 'var(--radius-lg)',
-            padding: '32px',
+            padding: 'clamp(20px, 5vw, 32px)',
             textAlign: 'center',
             cursor: 'pointer',
             background: isDragActive ? 'rgba(232,255,71,0.04)' : 'var(--surface)',
@@ -192,9 +261,9 @@ export default function UploadPage() {
         )}
 
         {status === 'done' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
-              onClick={() => { setFile(null); setPreview(null); setStatus('idle'); setResults([]) }}
+              onClick={() => setFileAndPreview(null)}
               style={{
                 flex: 1, padding: '14px',
                 background: 'var(--surface2)', color: 'var(--text)',
@@ -221,7 +290,7 @@ export default function UploadPage() {
       </div>
 
       {/* Right: Results Review */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="results-panel">
         {status === 'idle' && !results.length && (
           <div style={{
             height: '400px',
